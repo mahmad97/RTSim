@@ -130,6 +130,9 @@ SubArray::SubArray( )
     shiftReqs = 0;
     insertReqs = 0;
     deleteReqs = 0;
+    limReqs = 0;
+    numLims = 0;
+    totalNumLims = 0;
     activates = 0;
     precharges = 0;
     refreshes = 0;
@@ -297,14 +300,16 @@ void SubArray::RegisterStats( )
         AddStat(totalnumShifts);
         AddStat(insertReqs);
         AddStat(deleteReqs);
+        /* LIM (in-memory compute) stats apply to any RTM that issues LIM ops,
+           including the DWM MDTJ-sense path, not only skyrmion memories. */
+        AddStat(limReqs);
+        AddStat(totalNumLims);
         if (p->MemIsSK)
         {
             AddStat(numParallelShifts);
             AddStat(numSkyrmionCreated);
             AddStat(numSkyrmionDestroyed);
-            AddStat(limReqs);
-            AddStat(totalNumLims);
-        }        
+        }
     }    
     else
     {
@@ -1035,8 +1040,34 @@ bool SubArray::Lim( NVMainRequest *request ) {
     limReqs++;
 
     /**
-    * ###### Preparing LIM parameters #########    
-    */        
+    * ###### DWM (non-skyrmion) in-memory compute LIM #########
+    *
+    * For a domain-wall racetrack design such as CRAB, the in-memory MAC is a
+    * multi-domain MDTJ sense followed by a peripheral carry-resolve. The
+    * operands are already resident on the racetrack and the memory controller
+    * auto-issues a SHIFT to align the sensing port before this command (the
+    * skyrmion-only auto-shift suppression does not apply here), so the port
+    * alignment cost is already accounted for by the Shift() path. The reduction
+    * result is consumed by the peripheral adder, so there is no result-track
+    * write-back or shift. What remains is the sense+IMC energy itself, taken
+    * from the LTSpice-measured per-op figure (Elim), and the op latency (tLIM).
+    */
+    if( !p->MemIsSK )
+    {
+        numLims++;
+        totalNumLims++;
+        subArrayEnergy += p->Elim;
+        activeEnergy   += p->Elim;
+
+        GetEventQueue( )->InsertEvent( EventResponse, this, request,
+                        GetEventQueue()->GetCurrentCycle() + p->tLIM );
+        lastActivate = GetEventQueue()->GetCurrentCycle();
+        return true;
+    }
+
+    /**
+    * ###### Preparing LIM parameters #########
+    */
     ncounter_t port = FindClosestPort(dbc, dom ); //Port is based on first LIM
     uint32_t result_address = request->data.GetByte((wordSize / 8) + 0) << 24
                             | request->data.GetByte((wordSize / 8) + 1) << 16

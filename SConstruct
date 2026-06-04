@@ -25,7 +25,6 @@ build_type = GetOption("build_type")
 
 if build_type == None or build_type == "fast":
     env.Append(CCFLAGS='-O3')
-    env.Append(CCFLAGS='-Werror')
     env.Append(CCFLAGS='-Wall')
     env.Append(CCFLAGS='-Wextra')
     env.Append(CCFLAGS='-Woverloaded-virtual')
@@ -37,7 +36,6 @@ if build_type == None or build_type == "fast":
 elif build_type == "debug":
     env.Append(CCFLAGS='-O0')
     env.Append(CCFLAGS='-ggdb3')
-    env.Append(CCFLAGS='-Werror')
     env.Append(CCFLAGS='-Wall')
     env.Append(CCFLAGS='-Wextra')
     env.Append(CCFLAGS='-Woverloaded-virtual')
@@ -48,7 +46,6 @@ elif build_type == "prof":
     env.Append(CCFLAGS='-O0')
     env.Append(CCFLAGS='-ggdb3')
     env.Append(CCFLAGS='-pg')
-    env.Append(CCFLAGS='-Werror')
     env.Append(CCFLAGS='-Wall')
     env.Append(CCFLAGS='-Wextra')
     env.Append(CCFLAGS='-Woverloaded-virtual')
@@ -154,7 +151,7 @@ colors['red']    = '\033[91m'
 colors['normal'] = '\033[0m'
 
 if not sys.stdout.isatty():
-    for key, value in colors.iteritems():
+    for key, value in colors.items():
         colors[key] = ''
 
 

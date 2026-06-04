@@ -91,6 +91,8 @@ class Params
     double Eopenrd;
     double Erd;
     double Esh;
+    double Elim;   // DWM in-memory compute (MDTJ multi-domain sense + IMC) energy per LIM op
+    double Etrans; // inter-bank transfer energy per byte over the on-chip interconnect (nJ/B)
     double Eref;
     double Ewr;
     double Ewrpb;
@@ -167,6 +169,7 @@ class Params
     ncycle_t tIN;
     ncycle_t tDE;
     ncycle_t tLIM;
+    ncycle_t tTRANS;
     ncycle_t tRDB;
     ncycle_t tREFW;
     ncycle_t tRFC;

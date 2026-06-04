@@ -79,6 +79,11 @@ class RTM : public MemoryController
     uint64_t rb_miss;
     uint64_t starvation_precharges;
     uint64_t write_pauses;
+
+    /* Inter-bank transfer (on-chip interconnect) accounting. */
+    uint64_t numTrans;       // number of TRANS ops issued
+    uint64_t transBytes;     // total bytes transferred between banks
+    double   transferEnergy; // accrued inter-bank transfer energy (nJ)
 };
 
 };

@@ -77,6 +77,8 @@ Params::Params( )
     // Values from DRAMPower2 tool
     Erd = 3.405401;
     Esh = 0.0195;
+    Elim = 0.0;
+    Etrans = 0.0;  //inter-bank transfer energy per byte (nJ/B); 1250 pJ/B = 0.00125
     Eopenrd = 1.081080;
     Ewr = 1.023750;
     Ewrpb = Ewr / 512.0; // Estimated value
@@ -169,6 +171,7 @@ Params::Params( )
     tIN = 0; //default value is set to 0 so that it could not effect the timings of other types of memories 
     tDE = 0; //default value is set to 0 so that it could not effect the timings of other types of memories 
     tLIM = 0;
+    tTRANS = 0; //inter-bank transfer latency; default 0 so it does not affect other memories
     tRDB = 2;
     tREFW = 42666667;
     tRFC = 107;
@@ -298,6 +301,8 @@ void Params::SetParams( Config *c )
     c->GetEnergy( "Eopenrd", Eopenrd );
     c->GetEnergy( "Erd", Erd );
     c->GetEnergy( "Esh", Esh );
+    c->GetEnergy( "Elim", Elim );
+    c->GetEnergy( "Etrans", Etrans );
     c->GetEnergy( "Eref", Eref );
     c->GetEnergy( "Ewr", Ewr );
     c->GetEnergy( "Ewrpb", Ewrpb );
@@ -368,6 +373,7 @@ void Params::SetParams( Config *c )
     ConvertTiming( c, "tIN", tIN );
     ConvertTiming( c, "tDE", tDE );
     ConvertTiming( c, "tLIM", tLIM );
+    ConvertTiming( c, "tTRANS", tTRANS );
     ConvertTiming( c, "tRDB", tRDB );
     ConvertTiming( c, "tREFW", tREFW );
     ConvertTiming( c, "tRFC", tRFC );

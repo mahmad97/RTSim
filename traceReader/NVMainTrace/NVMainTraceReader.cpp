@@ -160,6 +160,10 @@ bool NVMainTraceReader::GetNextAccess( TraceLine *nextAccess )
                 {
                     operation = LIM;
                 }
+                else if ( field == "T") // inter-bank transfer (energy-only)
+                {
+                    operation = TRANS;
+                }
                 else
                     std::cout << "Warning: Unknown operation `" 
                         << field << "'" << std::endl;
@@ -252,7 +256,7 @@ bool NVMainTraceReader::GetNextAccess( TraceLine *nextAccess )
 
     linenum++;
 
-    if( operation != READ && operation != WRITE && operation != INSERT && operation != DELETE && operation != LIM && operation != PARALLEL)
+    if( operation != READ && operation != WRITE && operation != INSERT && operation != DELETE && operation != LIM && operation != PARALLEL && operation != TRANS)
         std::cout << "NVMainTraceReader: Unknown Operation: " << operation 
             << "Line number is " << linenum << ". Full Line is \"" << fullLine 
             << "\"" << std::endl;

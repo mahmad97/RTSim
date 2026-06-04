@@ -40,6 +40,7 @@
 
 #include "MemControl/RTM/RTM.h"
 #include "src/EventQueue.h"
+#include "src/Params.h"
 #include "include/NVMainRequest.h"
 #ifndef TRACE
 #ifdef GEM5
@@ -81,6 +82,10 @@ RTM::RTM( )
     write_pauses = 0;
 
     starvation_precharges = 0;
+
+    numTrans = 0;
+    transBytes = 0;
+    transferEnergy = 0.0;
 
     psInterval = 0;
 
@@ -126,6 +131,9 @@ void RTM::RegisterStats( )
     AddStat(measuredQueueLatencies);
     AddStat(measuredTotalLatencies);
     AddStat(write_pauses);
+    AddStat(numTrans);
+    AddStat(transBytes);
+    AddStat(transferEnergy);
 
     MemoryController::RegisterStats( );
 }
@@ -158,7 +166,30 @@ bool RTM::IssueCommand( NVMainRequest *req )
 
     req->arrivalCycle = GetEventQueue()->GetCurrentCycle();
 
-    /* 
+    /*
+     *  Inter-bank transfer (TRANS): a system-level data movement across the
+     *  on-chip interconnect, not a racetrack access. It does not touch a
+     *  subarray (no activate, no port-alignment shift, no read/write), so we
+     *  account its energy here -- Etrans (nJ/byte) times the bytes moved -- and
+     *  complete it directly after tTRANS, bypassing the bank command pipeline.
+     *  For single-bank workloads (LeNet-5) no TRANS ops are emitted, so this is
+     *  inert; it exists for multi-bank workloads such as AlexNet.
+     */
+    if( req->type == TRANS )
+    {
+        uint64_t bytes = req->data.GetSize( );
+        if( bytes == 0 ) bytes = 64; // fallback: one cacheline
+        numTrans++;
+        transBytes += bytes;
+        transferEnergy += p->Etrans * static_cast<double>(bytes);
+
+        req->issueCycle = GetEventQueue()->GetCurrentCycle();
+        GetEventQueue( )->InsertEvent( EventResponse, this, req,
+                        GetEventQueue()->GetCurrentCycle() + p->tTRANS );
+        return true;
+    }
+
+    /*
      *  Just push back the read/write. It's easier to inject dram commands than break it up
      *  here and attempt to remove them later.
      */
@@ -201,6 +232,7 @@ bool RTM::RequestComplete( NVMainRequest * request )
         || request->type == PARALLEL
         || request->type == LIM
         || request->type == DELETE
+        || request->type == TRANS
         )
     {
         request->status = MEM_REQUEST_COMPLETE;

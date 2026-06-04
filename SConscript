@@ -75,9 +75,9 @@ elif 'TARGET_ISA' in env:
     generated_dir = Dir('../protocol')
 
     def MakeIncludeAction(target, source, env):
-        f = file(str(target[0]), 'w')
+        f = open(str(target[0]), 'w')
         for s in source:
-            print >>f, '#include "%s"' % str(s.abspath)
+            f.write('#include "%s"\n' % str(s.abspath))
         f.close()
 
     def MakeInclude(source):

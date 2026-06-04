@@ -58,7 +58,8 @@ enum OpType
     DELETE,         /* only used in Skyrmion Racetrack memory */
     PARALLEL,              /* parallel+ write to Skyrmion racetrack memory*/
     LIM,
-    READ,           /* a.k.a. CAS-R */ 
+    TRANS,          /* inter-bank data transfer over the on-chip interconnect (energy-only) */
+    READ,           /* a.k.a. CAS-R */
     READ_PRECHARGE, /* CAS-R with implicit PRECHARGE */ 
     WRITE,          /* a.k.a. CAS-W */  
     WRITE_PRECHARGE,/* CAS-W with implicit PRECHARGE */ 
