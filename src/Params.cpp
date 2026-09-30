@@ -78,7 +78,7 @@ Params::Params( )
     Erd = 3.405401;
     Esh = 0.0195;
     Elim = 0.0;
-    Etrans = 0.0;  //inter-bank transfer energy per byte (nJ/B); 1250 pJ/B = 0.00125
+    Etrans = 0.0;  //inter-bank transfer energy per byte (nJ/B); e.g. 400 pJ/B = 0.40
     Eopenrd = 1.081080;
     Ewr = 1.023750;
     Ewrpb = Ewr / 512.0; // Estimated value

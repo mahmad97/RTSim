@@ -301,7 +301,7 @@ void SubArray::RegisterStats( )
         AddStat(insertReqs);
         AddStat(deleteReqs);
         /* LIM (in-memory compute) stats apply to any RTM that issues LIM ops,
-           including the DWM MDTJ-sense path, not only skyrmion memories. */
+           including the DWM MDMTJ-sense path, not only skyrmion memories. */
         AddStat(limReqs);
         AddStat(totalNumLims);
         if (p->MemIsSK)
@@ -1042,8 +1042,8 @@ bool SubArray::Lim( NVMainRequest *request ) {
     /**
     * ###### DWM (non-skyrmion) in-memory compute LIM #########
     *
-    * For a domain-wall racetrack design such as CRAB, the in-memory MAC is a
-    * multi-domain MDTJ sense followed by a peripheral carry-resolve. The
+    * For a domain-wall racetrack design such as MOSAIC, the in-memory MAC is a
+    * multi-domain MDMTJ sense followed by a peripheral carry-resolve. The
     * operands are already resident on the racetrack and the memory controller
     * auto-issues a SHIFT to align the sensing port before this command (the
     * skyrmion-only auto-shift suppression does not apply here), so the port

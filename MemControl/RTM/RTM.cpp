@@ -172,13 +172,13 @@ bool RTM::IssueCommand( NVMainRequest *req )
      *  subarray (no activate, no port-alignment shift, no read/write), so we
      *  account its energy here -- Etrans (nJ/byte) times the bytes moved -- and
      *  complete it directly after tTRANS, bypassing the bank command pipeline.
-     *  For single-bank workloads (LeNet-5) no TRANS ops are emitted, so this is
-     *  inert; it exists for multi-bank workloads such as AlexNet.
+     *  Traces without TRANS ops are unaffected.
      */
     if( req->type == TRANS )
     {
         uint64_t bytes = req->data.GetSize( );
-        if( bytes == 0 ) bytes = 64; // fallback: one cacheline
+        if( bytes == 0 ) bytes = 64; // no data (IgnoreData): one cacheline. NVMainTrace
+                                      // always sets 64, so every TRANS moves 64 B.
         numTrans++;
         transBytes += bytes;
         transferEnergy += p->Etrans * static_cast<double>(bytes);

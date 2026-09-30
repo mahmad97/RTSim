@@ -91,7 +91,7 @@ class Params
     double Eopenrd;
     double Erd;
     double Esh;
-    double Elim;   // DWM in-memory compute (MDTJ multi-domain sense + IMC) energy per LIM op
+    double Elim;   // DWM in-memory compute (MDMTJ multi-domain sense + IMC) energy per LIM op
     double Etrans; // inter-bank transfer energy per byte over the on-chip interconnect (nJ/B)
     double Eref;
     double Ewr;

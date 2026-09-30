@@ -5,8 +5,27 @@ build/*
 /traces_with_Ids
 .sconsign.dblite
 *.log
+.idea/
+
+# Compiled objects and binaries (scons emits .fo/.do/.po per build type)
 *.o
+*.fo
+*.do
+*.po
+*.so
+*.a
 *.fast
 *.debug
+*.prof
+nvmain.fast.*
+nvmain.debug.*
+nvmain.prof.*
+gmon.out
+
+# Python bytecode
+__pycache__/
+*.pyc
+
+# Generated traces and trace FIFOs (DWM-project writes these into Tests/Traces/)
 *.nvt
-.idea/
+*.fifo

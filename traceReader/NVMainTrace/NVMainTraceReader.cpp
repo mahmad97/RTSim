@@ -94,32 +94,41 @@ bool NVMainTraceReader::GetNextAccess( TraceLine *nextAccess )
     /* We will read in a full line and fill in these values */
     unsigned int cycle = 0;
     OpType operation = READ;
-    uint64_t address;
+    uint64_t address = 0;
     NVMDataBlock dataBlock;
     NVMDataBlock oldDataBlock;
     unsigned int threadId = 0;
-    
+
+    /*
+     *  Read the next line. Only an "NVMV" first line is a version header and
+     *  is consumed here; any other first line is a request. (Consuming the
+     *  first line unconditionally dropped the first op of every headerless
+     *  trace, and turned a one-line trace into a READ of an uninitialized
+     *  address.) getline's result, not eof(), decides the end, so a final
+     *  line without a trailing newline is still read.
+     */
+    bool gotLine = static_cast<bool>( getline( trace, fullLine ) );
+
+    if( gotLine && !readVersion )
+    {
+        readVersion = true;
+
+        if( fullLine.substr( 0, 4 ) == "NVMV" )
+        {
+            std::string versionString = fullLine.substr( 4, std::string::npos );
+            traceVersion = atoi( versionString.c_str( ) );
+            gotLine = static_cast<bool>( getline( trace, fullLine ) );
+        }
+    }
+
     /* There are no more lines in the trace... Send back a "dummy" line */
-    getline( trace, fullLine );
-    if( trace.eof( ) )
+    if( !gotLine )
     {
         NVMAddress nAddress;
         nAddress.SetPhysicalAddress( 0xDEADC0DEDEADBEEFULL );
         nextAccess->SetLine( nAddress, NOP, 0, dataBlock, oldDataBlock, 0 );
         std::cout << "NVMainTraceReader: Reached EOF!" << std::endl;
         return false;
-    }
-
-    if( !readVersion )
-    {
-        if( fullLine.substr( 0, 4 ) == "NVMV" )
-        {
-            std::string versionString = fullLine.substr( 4, std::string::npos );
-            traceVersion = atoi( versionString.c_str( ) );
-        }
-
-        readVersion = true;
-        getline( trace, fullLine );
     }
     
     std::istringstream lineStream( fullLine );

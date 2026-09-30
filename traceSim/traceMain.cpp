@@ -203,15 +203,16 @@ int TraceMain::RunTrace( int argc, char *argv[] )
         if( !trace->GetNextAccess( tl ) )
         {
             /*
-             *  Cycle at which the LAST COMMAND WAS ISSUED, reported before any
+             *  Cycle at which the controller ACCEPTED the last request (up to
+             *  QueueSize requests may still be queued), reported before any
              *  draining. simulation_cycles below includes the drain of every
              *  request still in flight, which is correct for a whole run but
              *  double-counts one drain per seam when a long trace is split into
              *  chunks that are simulated separately and summed. Summing
              *  issue_complete_cycles over the chunks and adding only the final
-             *  chunk's drain gives the artifact-free total, and lets a trace be
-             *  cut anywhere rather than only at points where the memory state
-             *  happens to be cold.
+             *  chunk's drain gives a LOWER bound on the whole-run total (each
+             *  chunk still starts with an empty queue); the summed
+             *  simulation_cycles is the upper bound.
              */
             std::cout << "issue_complete_cycles "
                       << globalEventQueue->GetCurrentCycle( ) << std::endl;
@@ -269,7 +270,7 @@ int TraceMain::RunTrace( int argc, char *argv[] )
             tl->SetLine( tl->GetAddress( ), tl->GetOperation( ), 0, 
                          tl->GetData( ), tl->GetOldData( ), tl->GetThreadId( ) );
 
-        if( request->type != READ && request->type != WRITE && request->type != INSERT && request->type != DELETE  && request->type != LIM && request->type!=PARALLEL)
+        if( request->type != READ && request->type != WRITE && request->type != INSERT && request->type != DELETE  && request->type != LIM && request->type!=PARALLEL && request->type != TRANS)
             std::cout << "traceMain: Unknown Operation: " << request->type 
                 << std::endl;
 
