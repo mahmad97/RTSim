@@ -202,6 +202,20 @@ int TraceMain::RunTrace( int argc, char *argv[] )
     {
         if( !trace->GetNextAccess( tl ) )
         {
+            /*
+             *  Cycle at which the LAST COMMAND WAS ISSUED, reported before any
+             *  draining. simulation_cycles below includes the drain of every
+             *  request still in flight, which is correct for a whole run but
+             *  double-counts one drain per seam when a long trace is split into
+             *  chunks that are simulated separately and summed. Summing
+             *  issue_complete_cycles over the chunks and adding only the final
+             *  chunk's drain gives the artifact-free total, and lets a trace be
+             *  cut anywhere rather than only at points where the memory state
+             *  happens to be cold.
+             */
+            std::cout << "issue_complete_cycles "
+                      << globalEventQueue->GetCurrentCycle( ) << std::endl;
+
             /* Force all modules to drain requests. */
             bool draining = Drain( );
 
