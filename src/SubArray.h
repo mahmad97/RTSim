@@ -162,6 +162,7 @@ class SubArray : public NVMObject
     ncounter_t numSkyrmionDestroyed; // Number of skyrmions deleted
     bool StaticPortAcces;
     bool LazyPortUpdate;
+    bool FifoPortUpdate;
     
     SubArrayState state;
     BulkCommand nextCommand;

@@ -187,6 +187,10 @@ void SubArray::SetConfig( Config *c, bool createChildren )
             LazyPortUpdate = true;
         else
             LazyPortUpdate = false;
+
+        /* fifo: the track only shifts forward (wrapping), writes enter at
+         * port 0 and reads leave at the last port */
+        FifoPortUpdate = ( p->PortUpdate == "fifo" );
         
         nPorts = p->nPorts;
         DOMAINS = p->DOMAINS;
@@ -870,6 +874,18 @@ bool SubArray::Shift( NVMainRequest *request )
     
     /* select port */
     ncounter_t port;
+
+    if( FifoPortUpdate )
+    {
+        bool isWrite = ( request->type == WRITE || request->type == WRITE_PRECHARGE );
+        port = isWrite ? 0 : nPorts - 1;
+        numShifts = ( int(dom) - rwPortPos[dbc][port] + int(DOMAINS) ) % int(DOMAINS);
+        for( ncounter_t i = 0; i < nPorts; i++ )
+            rwPortPos[dbc][i] = ( rwPortPos[dbc][i] + int(numShifts) ) % int(DOMAINS);
+        numShifts *= wordSize;
+    }
+    else
+    {
     
     // if( request->type == WRITE || request->type == WRITE_PRECHARGE )
     //     port = 0;
@@ -906,6 +922,7 @@ bool SubArray::Shift( NVMainRequest *request )
     {
         numShifts *= wordSize * 2; //numShifts for the entire word. In the eager policy, 2x shifts are incurred (align and come back)
         rwPortPos[dbc][port] = rwPortInitPos[dbc][port]; //Reset this port to the initial position
+    }
     }
     
     /* updated the total number of shifts */
